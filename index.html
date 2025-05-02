@@ -460,7 +460,6 @@
         verdictBtn.disabled = true;
       }
       
-      // iOS Safari hack - needs user interaction
       document.body.addEventListener('click', function initialClick() {
         window.speechSynthesis.cancel();
         document.body.removeEventListener('click', initialClick);
