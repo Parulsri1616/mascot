@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Judge Mascot</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f7;
+    }
+    
+    .mascot-container {
+      position: relative;
+      width: 350px;
+      height: 400px;
+      margin-bottom: 20px;
+    }
+    
+    /* Use placeholder image that looks like a judge */
+    .judge-image {
+      width: 100%;
+      height: 100%;
+      background-image: url('/api/placeholder/350/400');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      position: relative;
+    }
+    
+    /* We'll create a more realistic judge appearance */
+    .judge-head {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 350 400'%3E%3Cellipse cx='175' cy='150' rx='90' ry='100' fill='%23ffd6b6' stroke='%23000' stroke-width='3'/%3E%3Cpath d='M85,150 C85,80 125,50 175,50 C225,50 265,80 265,150' fill='%23f2e8dc' stroke='%23000' stroke-width='3'/%3E%3Cellipse cx='135' cy='140' rx='15' ry='8' fill='%23fff' stroke='%23000' stroke-width='2'/%3E%3Cellipse cx='215' cy='140' rx='15' ry='8' fill='%23fff' stroke='%23000' stroke-width='2'/%3E%3Ccircle cx='135' cy='140' r='5' fill='%23000'/%3E%3Ccircle cx='215' cy='140' r='5' fill='%23000'/%3E%3Cpath d='M175,160 Q185,180 175,190' fill='none' stroke='%23000' stroke-width='2'/%3E%3Cpath d='M150,200 Q175,210 200,200' fill='none' stroke='%23000' stroke-width='2.5' stroke-linecap='round'/%3E%3Cpath d='M85,150 L85,350 Q175,370 265,350 L265,150' fill='%232b2d42' stroke='%23000' stroke-width='3'/%3E%3Cpath d='M125,150 L175,190 L225,150' fill='%23fff' stroke='%23000' stroke-width='2'/%3E%3Cpath d='M100,160 C120,140 130,150 150,140' fill='none' stroke='%23000' stroke-width='2'/%3E%3Cpath d='M200,140 C220,150 230,140 250,160' fill='none' stroke='%23000' stroke-width='2'/%3E%3Cellipse cx='100' cy='170' rx='20' ry='25' fill='%23f2e8dc' stroke='%23000' stroke-width='2.5' transform='rotate(-15,100,170)'/%3E%3Cellipse cx='250' cy='170' rx='20' ry='25' fill='%23f2e8dc' stroke='%23000' stroke-width='2.5' transform='rotate(15,250,170)'/%3E%3C/svg%3E");
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+    
+    /* Gavel image */
+    .gavel {
+      position: absolute;
+      bottom: 80px;
+      left: 40px;
+      width: 120px;
+      height: 80px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 80'%3E%3Crect x='0' y='30' width='80' height='15' rx='5' fill='%238d5524' stroke='%23000' stroke-width='2'/%3E%3Crect x='80' y='20' width='30' height='35' rx='5' fill='%238d5524' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E");
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      transform-origin: bottom left;
+    }
+    
+    .mouth {
+      position: absolute;
+      top: 200px;
+      left: 150px;
+      width: 50px;
+      height: 20px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+    
+    .mouth-closed {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 20'%3E%3Cpath d='M5,10 Q25,15 45,10' fill='none' stroke='%23000' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    }
+    
+    .mouth-open {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 20'%3E%3Cpath d='M5,5 Q25,25 45,5' fill='%23ff9999' stroke='%23000' stroke-width='2.5'/%3E%3C/svg%3E");
+    }
+    
+    .speech-bubble {
+      position: absolute;
+      top: 20px;
+      right: -150px;
+      width: 200px;
+      background-color: white;
+      border: 3px solid black;
+      border-radius: 20px;
+      padding: 15px;
+      font-size: 16px;
+      font-weight: bold;
+      display: none;
+    }
+    
+    .speech-bubble:before {
+      content: '';
+      position: absolute;
+      left: -15px;
+      top: 30px;
+      border-top: 15px solid transparent;
+      border-bottom: 15px solid transparent;
+      border-right: 15px solid black;
+    }
+    
+    .speech-bubble:after {
+      content: '';
+      position: absolute;
+      left: -11px;
+      top: 32px;
+      border-top: 13px solid transparent;
+      border-bottom: 13px solid transparent;
+      border-right: 13px solid white;
+    }
+    
+    .talking .judge-head {
+      animation: nod 0.8s infinite ease-in-out;
+    }
+    
+    @keyframes nod {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(-3deg); }
+    }
+    
+    .gavel-strike {
+      animation: strike 0.5s ease-in-out;
+    }
+    
+    @keyframes strike {
+      0% { transform: rotate(0deg); }
+      50% { transform: rotate(-30deg); }
+      100% { transform: rotate(0deg); }
+    }
+    
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 20px;
+      width: 350px;
+    }
+    
+    button {
+      padding: 12px 24px;
+      background-color: #3a0ca3;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    button:hover {
+      background-color: #4312d1;
+      transform: translateY(-2px);
+    }
+    
+    .voice-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+    }
+    
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    
+    label {
+      font-weight: bold;
+      font-size: 14px;
+    }
+    
+    select {
+      padding: 8px 12px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      width: 150px;
+    }
+    
+    .verdict-text {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #fff;
+      border: 2px solid #3a0ca3;
+      border-radius: 8px;
+      min-height: 60px;
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    #voice-status {
+      color: #666;
+      font-size: 14px;
+      margin-top: 5px;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="mascot-container" id="mascot-container">
+    <div class="judge-image">
+      <div class="judge-head"></div>
+      <div class="mouth mouth-closed" id="mouth"></div>
+      <div class="gavel" id="gavel"></div>
+    </div>
+    <div class="speech-bubble" id="speech-bubble"></div>
+  </div>
+  
+  <div class="controls">
+    <button id="verdictBtn">Deliver Verdict</button>
+    
+    <div class="voice-controls">
+      <div class="control-group">
+        <label for="voice-select">Judge Voice:</label>
+        <select id="voice-select"></select>
+        <div id="voice-status">Loading voices...</div>
+      </div>
+      
+      <div class="control-group">
+        <label for="speed-select">Speech Speed:</label>
+        <select id="speed-select">
+          <option value="0.7">Slow</option>
+          <option value="0.9" selected>Normal</option>
+          <option value="1.1">Fast</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  
+  <div class="verdict-text" id="verdict-text"></div>
+
+  <script>
+    // Elements
+    const mascotContainer = document.getElementById('mascot-container');
+    const mouth = document.getElementById('mouth');
+    const gavel = document.getElementById('gavel');
+    const speechBubble = document.getElementById('speech-bubble');
+    const verdictBtn = document.getElementById('verdictBtn');
+    const verdictText = document.getElementById('verdict-text');
+    const voiceSelect = document.getElementById('voice-select');
+    const speedSelect = document.getElementById('speed-select');
+    const voiceStatus = document.getElementById('voice-status');
+    
+    // Verdicts
+    const verdicts = [
+      "I find the winners of PBL 2025",
+      "I declare Delhi Technical Campus as a shitass college",
+      "Order in the court! The verdict is GUILTY! The sentence is three days of community service.",
+      "Based on the evidence presented, I find the defendant GUILTY on all counts!",
+      "By the power vested in me, I find you INNOCENT of all charges. You are free to go."
+    ];
+    
+    // Voice handling
+    let voicesLoaded = false;
+    let availableVoices = [];
+    
+    // Initialize speech synthesis
+    function initVoices() {
+      // Try to get voices right away (works in Firefox)
+      availableVoices = window.speechSynthesis.getVoices();
+      
+      if (availableVoices.length > 0) {
+        populateVoiceList();
+      } else {
+        // Chrome and some browsers load voices asynchronously
+        window.speechSynthesis.onvoiceschanged = function() {
+          availableVoices = window.speechSynthesis.getVoices();
+          populateVoiceList();
+        };
+        
+        // If voices don't load within 3 seconds, show an error
+        setTimeout(function() {
+          if (!voicesLoaded) {
+            voiceStatus.textContent = "Could not load voices. Try a different browser.";
+            voiceStatus.style.color = "red";
+          }
+        }, 3000);
+      }
+    }
+    
+    // Populate the voice dropdown
+    function populateVoiceList() {
+      // Clear existing options
+      voiceSelect.innerHTML = '';
+      
+      // Filter for female or English voices as a fallback
+      const femaleVoices = availableVoices.filter(voice => 
+        voice.name.toLowerCase().includes('female') || 
+        voice.name.toLowerCase().includes('woman') ||
+        voice.name.toLowerCase().includes('girl')
+      );
+      
+      const englishVoices = availableVoices.filter(voice => 
+        voice.lang.includes('en') || 
+        voice.lang.includes('EN')
+      );
+      
+      // Use female voices if available, otherwise english voices, otherwise all voices
+      const voicesToUse = femaleVoices.length > 0 ? femaleVoices : 
+                           (englishVoices.length > 0 ? englishVoices : availableVoices);
+      
+      // Add voices to select dropdown
+      voicesToUse.forEach((voice, i) => {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = voice.name + ' (' + voice.lang + ')';
+        voiceSelect.appendChild(option);
+        
+        // Select a default female voice if available
+        if (i === 0) {
+          voiceSelect.value = i;
+        }
+        
+        // Prefer a female voice that's also in English if available
+        if (voice.name.toLowerCase().includes('female') && voice.lang.includes('en')) {
+          voiceSelect.value = i;
+        }
+      });
+      
+      // Update status
+      if (voicesToUse.length > 0) {
+        voiceStatus.textContent = `${voicesToUse.length} voices available`;
+        voiceStatus.style.color = "green";
+        voicesLoaded = true;
+      } else {
+        voiceStatus.textContent = "No voices found. Try a different browser.";
+        voiceStatus.style.color = "red";
+      }
+    }
+    
+    // Speak the verdict
+    function speakVerdict() {
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+      
+      // Get a random verdict
+      const verdict = verdicts[Math.floor(Math.random() * verdicts.length)];
+      
+      // Update text displays
+      verdictText.textContent = verdict;
+      speechBubble.textContent = verdict;
+      speechBubble.style.display = 'block';
+      
+      // Animate the gavel
+      gavel.classList.add('gavel-strike');
+      setTimeout(() => {
+        gavel.classList.remove('gavel-strike');
+      }, 500);
+      
+      // Create speech
+      const utterance = new SpeechSynthesisUtterance(verdict);
+      
+      // Set voice if available
+      if (voicesLoaded && availableVoices.length > 0) {
+        const selectedIndex = parseInt(voiceSelect.value);
+        if (!isNaN(selectedIndex) && selectedIndex < availableVoices.length) {
+          utterance.voice = availableVoices[selectedIndex];
+        }
+      }
+      
+      // Set speech rate
+      utterance.rate = parseFloat(speedSelect.value);
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+      
+      // Animation events
+      const startTalking = () => {
+        mascotContainer.classList.add('talking');
+        startMouthAnimation();
+      };
+      
+      const stopTalking = () => {
+        mascotContainer.classList.remove('talking');
+        stopMouthAnimation();
+        
+        // Hide speech bubble after a delay
+        setTimeout(() => {
+          speechBubble.style.display = 'none';
+        }, 2000);
+      };
+      
+      // Set up event handlers for speech
+      utterance.onstart = startTalking;
+      utterance.onend = stopTalking;
+      utterance.onerror = (event) => {
+        console.error('Speech error:', event);
+        stopTalking();
+        voiceStatus.textContent = "Speech error occurred. Try again.";
+        voiceStatus.style.color = "red";
+      };
+      
+      // Fixed for iOS Safari - call start before speak
+      startTalking();
+      
+      // Speak!
+      try {
+        window.speechSynthesis.speak(utterance);
+        console.log("Speech started with voice:", utterance.voice ? utterance.voice.name : "default");
+      } catch (error) {
+        console.error("Speech synthesis error:", error);
+        stopTalking();
+        voiceStatus.textContent = "Speech synthesis failed. Try a different browser.";
+        voiceStatus.style.color = "red";
+      }
+      
+      // Fallback in case speech synthesis fails to trigger events
+      setTimeout(() => {
+        if (window.speechSynthesis.speaking) {
+          console.log("Speech is still going...");
+        } else {
+          console.log("Speech may have failed, stopping animations");
+          stopTalking();
+        }
+      }, 5000);
+    }
+    
+    // Mouth animation
+    let mouthInterval;
+    
+    function startMouthAnimation() {
+      clearInterval(mouthInterval);
+      let isOpen = false;
+      
+      mouthInterval = setInterval(() => {
+        isOpen = !isOpen;
+        mouth.className = isOpen ? 'mouth mouth-open' : 'mouth mouth-closed';
+      }, 150);
+    }
+    
+    function stopMouthAnimation() {
+      clearInterval(mouthInterval);
+      mouth.className = 'mouth mouth-closed';
+    }
+    
+    // Event listeners
+    verdictBtn.addEventListener('click', speakVerdict);
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      // Force a blank verdict to start
+      verdictText.textContent = "Click the button to deliver a verdict!";
+      
+      // Initialize voices
+      if ('speechSynthesis' in window) {
+        initVoices();
+      } else {
+        voiceStatus.textContent = "Speech synthesis not supported in this browser";
+        voiceStatus.style.color = "red";
+        verdictBtn.disabled = true;
+      }
+      
+      // iOS Safari hack - needs user interaction
+      document.body.addEventListener('click', function initialClick() {
+        window.speechSynthesis.cancel();
+        document.body.removeEventListener('click', initialClick);
+      });
+    });
+    
+    // Fix for Chrome - restart speech if paused
+    setInterval(() => {
+      if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+        window.speechSynthesis.pause();
+        window.speechSynthesis.resume();
+      }
+    }, 10000);
+  </script>
+</body>
+</html>
